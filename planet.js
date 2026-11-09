@@ -271,7 +271,12 @@ export async function createPlanet(onProgress = () => {}) {
   group.add(new THREE.Mesh(new THREE.SphereGeometry(1.03, 96, 48), rim));
   group.add(new THREE.Mesh(new THREE.SphereGeometry(1.24, 96, 48), outer));
 
-  return { group, planet, clouds };
+ return {
+  group,
+  planet,
+  clouds,
+  landMask: maps.bump
+};
 }
 
 export function createStars(count = 2600) {
