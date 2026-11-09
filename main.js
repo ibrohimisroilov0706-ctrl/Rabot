@@ -1,9 +1,11 @@
+
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { REGIONS } from './regions.js';
 import { createPlanet, createStars } from './planet.js';
 import { createMarkers } from './markers.js';
 import { createGameplay } from './gameplay.js';
+import { createEnvironment } from './environment.js';
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('scene');
@@ -15,12 +17,19 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 
 /* ---------- Renderer ---------- */
 let renderer;
+
 try {
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true,
+    powerPreference: 'high-performance'
+  });
 } catch (err) {
   loaderText.textContent = "Brauzeringiz WebGL'ni qo'llab-quvvatlamaydi.";
   throw err;
 }
+
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
 const scene = new THREE.Scene();
@@ -58,22 +67,29 @@ controls.autoRotate = autoOn;
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
+
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   controls.maxDistance = homeDistance() * 1.5;
 }
+
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 200));
+
 resize();
 camera.position.copy(HOME_DIR).multiplyScalar(homeDistance());
 
 /* ---------- Fon ---------- */
 scene.add(createStars());
 
-/* ---------- Uchish animatsiyasi (hududga) ---------- */
+/* ---------- Uchish animatsiyasi ---------- */
 let fly = null;
-const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+const easeInOut = (t) =>
+  t < 0.5
+    ? 4 * t * t * t
+    : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 function flyTo(target, dist) {
   fly = {
@@ -84,6 +100,7 @@ function flyTo(target, dist) {
     t: 0,
     dur: reduceMotion ? 0.01 : 1.3
   };
+
   controls.autoRotate = false;
 }
 
@@ -93,13 +110,19 @@ const qId = new THREE.Quaternion();
 
 function updateFly(dt) {
   if (!fly) return;
+
   fly.t = Math.min(1, fly.t + dt / fly.dur);
+
   const k = easeInOut(fly.t);
+
   qFull.setFromUnitVectors(fly.fromDir, fly.toDir);
   qStep.copy(qId).slerp(qFull, k);
+
   const dir = fly.fromDir.clone().applyQuaternion(qStep);
   const dist = THREE.MathUtils.lerp(fly.fromDist, fly.toDist, k);
+
   camera.position.copy(dir.multiplyScalar(dist));
+
   if (fly.t >= 1) fly = null;
 }
 
@@ -107,31 +130,39 @@ function updateFly(dt) {
 const panel = $('panel');
 const hint = $('hint');
 const chipsEl = $('chips');
+
 let markers = null;
 let planetMesh = null;
 let gameplay = null;
+let environment = null;
+let clouds = null;
 let activeId = null;
 
 const chipButtons = new Map();
 
 REGIONS.forEach((r) => {
   const b = document.createElement('button');
+
   b.type = 'button';
   b.textContent = r.name;
+
   b.addEventListener('click', () => {
     if (gameplay && gameplay.mode === 'life') {
       const phi = THREE.MathUtils.degToRad(90 - r.lat);
       const theta = THREE.MathUtils.degToRad(r.lon + 180);
+
       const point = new THREE.Vector3(
         -Math.sin(phi) * Math.cos(theta),
         Math.cos(phi),
         Math.sin(phi) * Math.sin(theta)
       );
+
       gameplay.handleSurfaceClick(point);
     } else {
       openRegion(r.id);
     }
   });
+
   chipsEl.appendChild(b);
   chipButtons.set(r.id, b);
 });
@@ -157,8 +188,10 @@ function openRegion(id) {
     const row = document.createElement('div');
     const dt = document.createElement('dt');
     const dd = document.createElement('dd');
+
     dt.textContent = k;
     dd.textContent = v;
+
     row.append(dt, dd);
     facts.appendChild(row);
   });
@@ -178,6 +211,7 @@ function openRegion(id) {
 
   const item = markers.items.find((it) => it.region.id === id);
   const isNarrow = window.innerWidth < 700;
+
   flyTo(item.pos, isNarrow ? 3.1 : 2.7);
 }
 
@@ -211,8 +245,11 @@ btnAuto.setAttribute('aria-pressed', String(autoOn));
 
 btnAuto.addEventListener('click', () => {
   autoOn = !autoOn;
+
   btnAuto.setAttribute('aria-pressed', String(autoOn));
+
   clearTimeout(idleTimer);
+
   controls.autoRotate = autoOn && !activeId && controls.enabled;
 });
 
@@ -246,7 +283,7 @@ controls.addEventListener('start', () => {
 
 controls.addEventListener('end', () => scheduleAutoRotate());
 
-/* ---------- Bosish (tap/click) bilan tanlash ---------- */
+/* ---------- Bosish bilan tanlash ---------- */
 const raycaster = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
 
@@ -322,13 +359,14 @@ function pick(x, y) {
   }
 }
 
-/* ---------- Belgilar (HTML yorliqlar) ---------- */
+/* ---------- Belgilar ---------- */
 const labelsEl = $('labels');
 const tmp = new THREE.Vector3();
 
 function buildLabels() {
   markers.items.forEach((it) => {
     const el = document.createElement('button');
+
     el.type = 'button';
     el.className = 'label';
     el.textContent = it.region.name;
@@ -382,10 +420,9 @@ function updateLabels() {
   });
 }
 
-/* ---------- Ishga tushirish ---------- */
+/* ---------- Animatsiya ---------- */
 const clock = new THREE.Clock();
 const yAxis = new THREE.Vector3(0, 1, 0);
-let clouds = null;
 
 function animate() {
   requestAnimationFrame(animate);
@@ -396,6 +433,7 @@ function animate() {
   if (controls.enabled) updateFly(dt);
 
   const d = camera.position.length();
+
   const k = THREE.MathUtils.clamp(
     (d - MIN_DIST) / (homeDistance() - MIN_DIST),
     0,
@@ -407,6 +445,14 @@ function animate() {
   if (controls.enabled) controls.update();
 
   if (gameplay) gameplay.update(dt);
+
+  // RABOT 0.3: yaqin atrofdagi daraxt va o'simliklarni yuklash
+  if (environment && gameplay) {
+    environment.update(
+      gameplay.playerDirection,
+      gameplay.mode === 'life'
+    );
+  }
 
   sun.position
     .copy(camera.position)
@@ -428,6 +474,7 @@ function animate() {
   renderer.render(scene, camera);
 }
 
+/* ---------- Ishga tushirish ---------- */
 async function start() {
   const planet = await createPlanet((p) => {
     bar.style.width = `${Math.round(p * 100)}%`;
@@ -437,6 +484,13 @@ async function start() {
 
   planetMesh = planet.planet;
   clouds = planet.clouds;
+
+  // RABOT 0.3: quruqlik xaritasidan foydalanib muhit yaratish
+  if (planet.landMask) {
+    environment = createEnvironment(scene, planet.landMask);
+  } else {
+    console.error('RABOT: landMask xaritasi topilmadi.');
+  }
 
   markers = createMarkers(scene);
   buildLabels();
@@ -458,4 +512,3 @@ start().catch((err) => {
   console.error(err);
   loaderText.textContent = "Xatolik yuz berdi. Sahifani yangilang.";
 });
-
