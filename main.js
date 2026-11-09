@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { REGIONS } from './regions.js';
 import { createPlanet, createStars } from './planet.js';
 import { createMarkers } from './markers.js';
+import { createGameplay } from './gameplay.js';
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('scene');
@@ -70,7 +71,7 @@ camera.position.copy(HOME_DIR).multiplyScalar(homeDistance());
 /* ---------- Fon ---------- */
 scene.add(createStars());
 
-/* ---------- Ucish animatsiyasi (hududga) ---------- */
+/* ---------- Uchish animatsiyasi (hududga) ---------- */
 let fly = null;
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -89,6 +90,7 @@ function flyTo(target, dist) {
 const qFull = new THREE.Quaternion();
 const qStep = new THREE.Quaternion();
 const qId = new THREE.Quaternion();
+
 function updateFly(dt) {
   if (!fly) return;
   fly.t = Math.min(1, fly.t + dt / fly.dur);
@@ -107,14 +109,29 @@ const hint = $('hint');
 const chipsEl = $('chips');
 let markers = null;
 let planetMesh = null;
+let gameplay = null;
 let activeId = null;
 
 const chipButtons = new Map();
+
 REGIONS.forEach((r) => {
   const b = document.createElement('button');
   b.type = 'button';
   b.textContent = r.name;
-  b.addEventListener('click', () => openRegion(r.id));
+  b.addEventListener('click', () => {
+    if (gameplay && gameplay.mode === 'life') {
+      const phi = THREE.MathUtils.degToRad(90 - r.lat);
+      const theta = THREE.MathUtils.degToRad(r.lon + 180);
+      const point = new THREE.Vector3(
+        -Math.sin(phi) * Math.cos(theta),
+        Math.cos(phi),
+        Math.sin(phi) * Math.sin(theta)
+      );
+      gameplay.handleSurfaceClick(point);
+    } else {
+      openRegion(r.id);
+    }
+  });
   chipsEl.appendChild(b);
   chipButtons.set(r.id, b);
 });
@@ -122,13 +139,20 @@ REGIONS.forEach((r) => {
 function openRegion(id) {
   const region = REGIONS.find((r) => r.id === id);
   if (!region || !markers) return;
+
   activeId = id;
+
+  if (gameplay) {
+    gameplay.selectLatLon(region.lat, region.lon, region.name);
+  }
 
   $('pKind').textContent = region.kind;
   $('pName').textContent = region.name;
   $('pDesc').textContent = region.desc;
+
   const facts = $('pFacts');
   facts.innerHTML = '';
+
   region.facts.forEach(([k, v]) => {
     const row = document.createElement('div');
     const dt = document.createElement('dt');
@@ -141,8 +165,15 @@ function openRegion(id) {
 
   panel.classList.add('open');
   markers.setActive(id);
-  chipButtons.forEach((btn, key) => btn.classList.toggle('active', key === id));
-  markers.items.forEach((it) => it.label.classList.toggle('active', it.region.id === id));
+
+  chipButtons.forEach((btn, key) => {
+    btn.classList.toggle('active', key === id);
+  });
+
+  markers.items.forEach((it) => {
+    it.label.classList.toggle('active', it.region.id === id);
+  });
+
   hint.classList.add('hide');
 
   const item = markers.items.find((it) => it.region.id === id);
@@ -153,37 +184,56 @@ function openRegion(id) {
 function closeRegion() {
   activeId = null;
   panel.classList.remove('open');
+
   if (markers) markers.setActive(null);
+
   chipButtons.forEach((btn) => btn.classList.remove('active'));
-  if (markers) markers.items.forEach((it) => it.label.classList.remove('active'));
+
+  if (markers) {
+    markers.items.forEach((it) => it.label.classList.remove('active'));
+  }
+
   scheduleAutoRotate(1500);
 }
 
 $('panelClose').addEventListener('click', closeRegion);
+
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeRegion();
+  if (e.key === 'Escape' && (!gameplay || gameplay.mode !== 'life')) {
+    closeRegion();
+  }
 });
 
 /* ---------- Tugmalar ---------- */
 const btnAuto = $('btnAuto');
+
 btnAuto.setAttribute('aria-pressed', String(autoOn));
+
 btnAuto.addEventListener('click', () => {
   autoOn = !autoOn;
   btnAuto.setAttribute('aria-pressed', String(autoOn));
   clearTimeout(idleTimer);
-  controls.autoRotate = autoOn && !activeId;
+  controls.autoRotate = autoOn && !activeId && controls.enabled;
 });
 
 $('btnReset').addEventListener('click', () => {
+  if (gameplay && gameplay.mode === 'life') {
+    $('rabot-global').click();
+  }
+
   closeRegion();
   flyTo(HOME_DIR, homeDistance());
 });
 
 function scheduleAutoRotate(delay = 3500) {
   clearTimeout(idleTimer);
-  if (!autoOn || activeId) return;
+
+  if (!autoOn || activeId || !controls.enabled) return;
+
   idleTimer = setTimeout(() => {
-    if (!fly && !activeId) controls.autoRotate = true;
+    if (!fly && !activeId && controls.enabled) {
+      controls.autoRotate = true;
+    }
   }, delay);
 }
 
@@ -193,34 +243,49 @@ controls.addEventListener('start', () => {
   clearTimeout(idleTimer);
   hint.classList.add('hide');
 });
+
 controls.addEventListener('end', () => scheduleAutoRotate());
 
 /* ---------- Bosish (tap/click) bilan tanlash ---------- */
 const raycaster = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
+
 let downInfo = null;
 let pointerCount = 0;
 let multiTouch = false;
 
 canvas.addEventListener('pointerdown', (e) => {
   pointerCount++;
+
   if (pointerCount > 1) multiTouch = true;
-  downInfo = { x: e.clientX, y: e.clientY, t: performance.now() };
+
+  downInfo = {
+    x: e.clientX,
+    y: e.clientY,
+    t: performance.now()
+  };
 });
 
 canvas.addEventListener('pointerup', (e) => {
   pointerCount = Math.max(0, pointerCount - 1);
+
   const info = downInfo;
   const wasMulti = multiTouch;
+
   if (pointerCount === 0) {
     multiTouch = false;
     downInfo = null;
   }
+
   if (!info || wasMulti) return;
+
   const moved = Math.hypot(e.clientX - info.x, e.clientY - info.y);
+
   if (moved > 6 || performance.now() - info.t > 600) return;
+
   pick(e.clientX, e.clientY);
 });
+
 canvas.addEventListener('pointercancel', () => {
   pointerCount = 0;
   multiTouch = false;
@@ -229,12 +294,31 @@ canvas.addEventListener('pointercancel', () => {
 
 function pick(x, y) {
   if (!markers || !planetMesh) return;
+
   const rect = canvas.getBoundingClientRect();
-  ndc.set(((x - rect.left) / rect.width) * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
+
+  ndc.set(
+    ((x - rect.left) / rect.width) * 2 - 1,
+    -((y - rect.top) / rect.height) * 2 + 1
+  );
+
   raycaster.setFromCamera(ndc, camera);
-  const hits = raycaster.intersectObjects([planetMesh, ...markers.hitMeshes], false);
-  if (hits.length && hits[0].object.userData.regionId) {
-    openRegion(hits[0].object.userData.regionId);
+
+  const hits = raycaster.intersectObjects(
+    [planetMesh, ...markers.hitMeshes],
+    false
+  );
+
+  if (!hits.length) return;
+
+  if (hits[0].object.userData.regionId) {
+    if (gameplay && gameplay.mode === 'life') {
+      gameplay.handleSurfaceClick(hits[0].point);
+    } else {
+      openRegion(hits[0].object.userData.regionId);
+    }
+  } else if (hits[0].object === planetMesh && gameplay) {
+    gameplay.handleSurfaceClick(hits[0].point);
   }
 }
 
@@ -248,7 +332,24 @@ function buildLabels() {
     el.type = 'button';
     el.className = 'label';
     el.textContent = it.region.name;
-    el.addEventListener('click', () => openRegion(it.region.id));
+
+    el.addEventListener('click', () => {
+      if (gameplay && gameplay.mode === 'life') {
+        const phi = THREE.MathUtils.degToRad(90 - it.region.lat);
+        const theta = THREE.MathUtils.degToRad(it.region.lon + 180);
+
+        const point = new THREE.Vector3(
+          -Math.sin(phi) * Math.cos(theta),
+          Math.cos(phi),
+          Math.sin(phi) * Math.sin(theta)
+        );
+
+        gameplay.handleSurfaceClick(point);
+      } else {
+        openRegion(it.region.id);
+      }
+    });
+
     labelsEl.appendChild(el);
     it.label = el;
   });
@@ -257,18 +358,25 @@ function buildLabels() {
 function updateLabels() {
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
+
   markers.items.forEach((it) => {
-    const facing = it.pos.dot(camera.position) - 1; // > 0 bo'lsa nuqta ko'rinadi
+    const facing = it.pos.dot(camera.position) - 1;
     const el = it.label;
+
     if (facing < 0.06) {
       el.style.opacity = '0';
       el.style.pointerEvents = 'none';
       return;
     }
+
     tmp.copy(it.pos).project(camera);
+
     const x = (tmp.x * 0.5 + 0.5) * w;
     const y = (-tmp.y * 0.5 + 0.5) * h;
-    el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, 14px)`;
+
+    el.style.transform =
+      `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, 14px)`;
+
     el.style.opacity = String(Math.min(1, facing * 5));
     el.style.pointerEvents = facing > 0.2 ? 'auto' : 'none';
   });
@@ -281,22 +389,37 @@ let clouds = null;
 
 function animate() {
   requestAnimationFrame(animate);
+
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.elapsedTime;
 
-  updateFly(dt);
+  if (controls.enabled) updateFly(dt);
 
-  // Yaqinlashgan sari aylantirish sekinlashadi
   const d = camera.position.length();
-  const k = THREE.MathUtils.clamp((d - MIN_DIST) / (homeDistance() - MIN_DIST), 0, 1);
-  controls.rotateSpeed = THREE.MathUtils.lerp(0.25, 0.7, k);
-  controls.update();
+  const k = THREE.MathUtils.clamp(
+    (d - MIN_DIST) / (homeDistance() - MIN_DIST),
+    0,
+    1
+  );
 
-  // Quyosh kameraga nisbatan yon tomondan tushadi
-  sun.position.copy(camera.position).normalize().applyAxisAngle(yAxis, 0.7).multiplyScalar(10);
+  controls.rotateSpeed = THREE.MathUtils.lerp(0.25, 0.7, k);
+
+  if (controls.enabled) controls.update();
+
+  if (gameplay) gameplay.update(dt);
+
+  sun.position
+    .copy(camera.position)
+    .normalize()
+    .applyAxisAngle(yAxis, 0.7)
+    .multiplyScalar(10);
+
   sun.position.y += 3;
 
-  if (clouds && !reduceMotion) clouds.rotation.y += dt * 0.012;
+  if (clouds && !reduceMotion) {
+    clouds.rotation.y += dt * 0.012;
+  }
+
   if (markers) {
     markers.update(t);
     updateLabels();
@@ -309,15 +432,25 @@ async function start() {
   const planet = await createPlanet((p) => {
     bar.style.width = `${Math.round(p * 100)}%`;
   });
+
   scene.add(planet.group);
+
   planetMesh = planet.planet;
   clouds = planet.clouds;
 
   markers = createMarkers(scene);
   buildLabels();
 
+  gameplay = createGameplay({
+    scene,
+    camera,
+    renderer,
+    controls
+  });
+
   bar.style.width = '100%';
   loader.classList.add('done');
+
   animate();
 }
 
@@ -325,3 +458,4 @@ start().catch((err) => {
   console.error(err);
   loaderText.textContent = "Xatolik yuz berdi. Sahifani yangilang.";
 });
+
