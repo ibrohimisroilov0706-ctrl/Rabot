@@ -1,7 +1,9 @@
+
 import * as THREE from 'three';
 
-// RABOT 0.2 gameplay foundation:
-// global view, inspection and click-to-move life view.
+// RABOT 0.3 gameplay foundation:
+// Global View, Inspection View and Life View.
+// Smaller avatar + streamed environment support.
 
 export function createGameplay({ scene, camera, renderer, controls }) {
   const initialCamera = camera.position.clone();
@@ -332,6 +334,13 @@ export function createGameplay({ scene, camera, renderer, controls }) {
       rightLeg
     };
 
+    // RABOT 0.3: avatar tanasini 3 barobar kichraytirish.
+    // Avatar guruhining planetadagi joylashuvi o'zgarmaydi.
+    avatar.children.forEach((part) => {
+      part.position.multiplyScalar(1 / 3);
+      part.scale.multiplyScalar(1 / 3);
+    });
+
     scene.add(avatar);
 
     return avatar;
@@ -394,8 +403,9 @@ export function createGameplay({ scene, camera, renderer, controls }) {
 
     camera.up.copy(up);
 
+    // Kichraytirilgan avatar uchun kamera nishoni moslashtirildi.
     const target = state.player.position.clone()
-      .addScaledVector(up, 0.027);
+      .addScaledVector(up, 0.009);
 
     camera.lookAt(target);
   }
@@ -489,6 +499,8 @@ export function createGameplay({ scene, camera, renderer, controls }) {
   function globalView() {
     state.mode = 'global';
     state.destination = null;
+    state.keys.clear();
+    state.moving = false;
 
     if (state.player) {
       state.player.visible = false;
@@ -730,6 +742,11 @@ export function createGameplay({ scene, camera, renderer, controls }) {
 
     get mode() {
       return state.mode;
+    },
+
+    // RABOT 0.3: environment.js avatar joylashuvini oladi.
+    get playerDirection() {
+      return state.playerDirection;
     }
   };
 }
