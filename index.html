@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>So‘nggi yomg‘ir tomchisi — animatsion qisqa film</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="stage">
+    <canvas id="film" width="1920" height="1080" aria-label="So‘nggi yomg‘ir tomchisi — 3D animatsion film"></canvas>
+
+    <div id="loader">
+      <div class="ttl">SO‘NGGI YOMG‘IR TOMCHISI</div>
+      <div class="drop"></div>
+      <div id="status">Yuklanmoqda…</div>
+    </div>
+
+    <button id="bigplay" class="hidden" aria-label="Filmni boshlash">
+      <span class="tri">▶</span><span class="lbl">Filmni boshlash</span>
+    </button>
+
+    <div id="controls">
+      <button id="playpause" title="Ijro">▶</button>
+      <button id="restart" title="Qayta boshlash">↺</button>
+      <div class="seekwrap">
+        <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Vaqt">
+        <div id="marks"></div>
+      </div>
+      <span id="time">0:00 / 2:04</span>
+      <span id="scene">1-sahna · Yolg‘izlik</span>
+      <button id="mute" title="Ovozni o‘chirish/yoqish">🔊</button>
+      <input id="vol" type="range" min="0" max="100" value="80" aria-label="Ovoz balandligi">
+      <button id="full" title="To‘liq ekran (F)">⛶</button>
+    </div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
