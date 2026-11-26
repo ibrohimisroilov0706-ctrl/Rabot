@@ -34,9 +34,11 @@ export class CityScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.setBackgroundColor('#0b1f38');
     // Boshlang'ich binolar 0-7 joylarda (yuqori qator): ularni ko'rinadigan qismga, pastki varaq ustiga joylaymiz
-    const fit = Math.min(1.35, Math.max(0.8, this.scale.width / 330));
+    // Boshlang'ich binolar (0-11 joylar) ~ x: -60..300, y: -100..210 (saroy tepasi bilan). Ular ekranga sig'sin va
+    // pastki varaq (ekranning ~30%) ustida tursin: markazni 116px yuqoriga suramiz.
+    const fit = Math.min(1.3, Math.max(0.8, this.scale.width / 400));
     cam.setZoom(fit);
-    cam.centerOn(2 * (TW / 2), 2.2 * TH + 140 / fit);
+    cam.centerOn(120, 55 + 116 / fit);
     this.input.on('pointerdown', () => { this.dragging = false; });
     this.input.on('pointermove', (p: Phaser.Input.Pointer) => {
       if (!p.isDown) return;
