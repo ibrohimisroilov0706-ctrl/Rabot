@@ -184,3 +184,68 @@ textarea { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rg
 .neg { color: #ff8a80; }
 .palace-scene { width: 100%; display: block; border-radius: var(--radius); border: 2px solid var(--oltin); margin-bottom: 8px; }
 .toast .t-act { pointer-events: auto; margin-left: 10px; border: 1px solid var(--oltin); background: rgba(212,165,55,.2); color: var(--oltin-l); border-radius: 8px; padding: 3px 8px; font: inherit; }
+
+/* ================= Lord rejimi (global xarita + boshqariladigan jang) ================= */
+body.lord #stage { position: relative; overflow: hidden; }
+.lord-map { position: absolute; inset: 0; display: block; touch-action: none; }
+.lord-hud { display: flex; width: 100%; justify-content: space-between; gap: 4px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.lord-hud span { background: rgba(0,0,0,.28); border: 1px solid rgba(212,165,55,.35); border-radius: 8px; padding: 4px 6px; }
+body.lord .nav-btn b { font-size: 11px; font-weight: 600; }
+body.lord .nav-btn.on { color: var(--oltin-l); background: radial-gradient(ellipse at top, rgba(212,165,55,.45), transparent 70%); }
+.menu-list { display: grid; gap: 8px; margin-top: 12px; }
+.menu-list .btn { text-align: left; }
+.set-info { display: grid; gap: 4px; }
+.pos { color: #8fe39b; } .neg { color: #ff8c7f; }
+.muted.small, .small { font-size: 12px; }
+.enc-vs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; margin: 10px 0; text-align: center; }
+.enc-vs > div { background: rgba(0,0,0,.25); border-radius: 10px; padding: 8px; }
+.enc-vs .vs { background: none; font-size: 26px; }
+.hero-card { display: flex; gap: 12px; align-items: center; background: rgba(0,0,0,.25); border: 1px solid rgba(212,165,55,.4); border-radius: 12px; padding: 8px; }
+.hero-card h3 { margin: 0 0 2px; color: var(--oltin-l); }
+.econ { display: grid; gap: 2px; margin: 10px 0; font-size: 14px; }
+.tr-card { border-top: 1px solid rgba(255,255,255,.08); padding: 6px 0; }
+.tr-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.tr-row .btn.small { white-space: nowrap; }
+.tr-name { flex: 1; min-width: 0; }
+.tr-name small { color: var(--muted); }
+.stars { color: var(--oltin); letter-spacing: -1px; }
+.u-ico { flex: none; }
+.xpbar { width: 54px; height: 6px; background: rgba(255,255,255,.12); border-radius: 3px; overflow: hidden; }
+.xpbar i { display: block; height: 100%; background: linear-gradient(90deg, #43b3c4, #f0d58a); }
+.tr-up { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 2px 0 4px 48px; font-size: 13px; }
+.dip-row { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.08); }
+.dip-flag { width: 14px; height: 38px; border-radius: 3px; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.4); }
+.log-row { padding: 5px 0; border-top: 1px solid rgba(255,255,255,.06); font-size: 14px; }
+.log-row small { color: var(--oltin); }
+.row-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.help p { margin: 0 0 10px; }
+.lord-onb { position: fixed; inset: 0; z-index: 40; overflow-y: auto; padding: calc(24px + env(safe-area-inset-top)) 18px 24px; background: var(--night) var(--girih); display: flex; flex-direction: column; gap: 10px; }
+.lord-onb h1 { color: var(--oltin-l); text-align: center; font-size: 34px; margin: 0; }
+.lord-onb > p { text-align: center; margin: 0 0 6px; }
+.inp { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--oltin); background: rgba(0,0,0,.3); color: var(--text); font: inherit; font-size: 16px; }
+.cu-list { display: grid; gap: 8px; }
+.cu-card { display: flex; gap: 10px; align-items: center; text-align: left; border: 1px solid rgba(212,165,55,.35); background: rgba(15,42,74,.8); color: var(--text); border-radius: 12px; padding: 6px 10px; font: inherit; }
+.cu-card.on { border-color: var(--oltin-l); background: linear-gradient(90deg, rgba(212,165,55,.3), rgba(15,42,74,.8)); box-shadow: 0 0 0 1px var(--oltin-l); }
+
+/* jang */
+.battle-overlay.lb { background: #10161f; }
+.bt-top { position: fixed; top: calc(6px + env(safe-area-inset-top)); left: 6px; right: 6px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: start; pointer-events: none; }
+.bt-mid { font: 700 14px Georgia, serif; color: #fff; text-shadow: 0 1px 3px #000; text-align: center; padding-top: 4px; }
+.bt-side { position: relative; background: rgba(0,0,0,.55); border-radius: 8px; padding: 4px 8px 8px; color: #fff; font-size: 12px; display: flex; justify-content: space-between; gap: 6px; overflow: hidden; }
+.bt-side b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bt-side i { position: absolute; left: 0; bottom: 0; height: 4px; transition: width .3s; }
+.bt-side.r i { left: auto; right: 0; }
+.bt-ctl { position: fixed; left: 0; right: 0; bottom: 0; padding: 6px 6px calc(8px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgba(5,10,20,.85) 30%); display: grid; gap: 6px; }
+.bt-row { display: flex; gap: 5px; }
+.bt-row button { flex: 1; min-width: 0; border-radius: 10px; border: 1px solid rgba(212,165,55,.5); background: rgba(15,42,74,.92); color: #fff; font: 600 13px system-ui; padding: 9px 2px; white-space: nowrap; }
+.bt-row .bt-g.on { background: linear-gradient(#e7bf5a, #b8871e); color: #2b1c05; }
+.bt-row .bt-o.charge { background: linear-gradient(#c0392b, #8e2219); }
+.bt-row .bt-b.on { background: #1f8a9e; }
+.bt-row .bt-b.red { border-color: #ff9d94; background: rgba(120,30,25,.9); }
+.bt-hint { position: fixed; left: 12px; right: 12px; top: calc(56px + env(safe-area-inset-top)); text-align: center; color: #fff; font-size: 13px; background: rgba(0,0,0,.5); border-radius: 10px; padding: 8px; transition: opacity .6s; pointer-events: none; }
+.bt-hint.out { opacity: 0; }
+.bt-flash { position: fixed; left: 0; right: 0; top: 40%; text-align: center; font: 700 26px Georgia, serif; color: #fff; text-shadow: 0 2px 6px #000; opacity: 0; pointer-events: none; }
+.bt-flash.show { animation: btflash 0.9s ease-out; }
+@keyframes btflash { 0% { opacity: 0; transform: scale(.8); } 20% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0; transform: scale(1); } }
+.lb .battle-result { position: fixed; left: 10px; right: 10px; bottom: calc(12px + env(safe-area-inset-bottom)); max-height: 70vh; overflow-y: auto; }
+.lb .battle-result h4 { margin: 6px 0 4px; color: var(--oltin-l); }

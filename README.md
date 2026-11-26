@@ -53,19 +53,18 @@ O'yin: **https://ibrohimisroilov0706-ctrl.github.io/Rabot/play/**
 
 Server, VPS yoki telefonni yoqiq ushlab turish shart emas. Har push'da GitHub o'yinni o'zi build qiladi (`play/` papkasi).
 
-**Qanday ishlaydi:**
-- Har bir o'yinchi o'z shahrini o'z telefonida rivojlantiradi.
+**Qanday ishlaydi (lord rejimi):**
+- Siz lord sifatida 2D global xaritada otryadingiz bilan yurasiz. Vaqt faqat yurganingizda yoki "⏳ Kutish" yoqilganda o'tadi.
+- Dunyoda 5 ta davlat (Temuriylar, Ruslar, Inglizlar, Usmonlilar, Mo'g'ullar), 15 ta shahar, 15 ta qal'a, 60 ga yaqin qishloq, 25 ta AI lord va qaroqchilar bor. Lordlar urushadi, qishloq talaydi, qal'alarni qamal qiladi; davlatlar urush e'lon qiladi va sulh tuzadi.
+- Qishloqdan ko'ngillilar yollaysiz, shaharda oziq-ovqat va yollanma askar olasiz, asirlarni sotasiz. Askarlar tajriba oladi va daraxt bo'yicha oshiriladi (har millatda 8–9 tur: piyoda → nayzachi/otliq → ritsar, bahodir, mang'ut, jangovar fil...).
+- Janglarni o'zingiz boshqarasiz: maydonga bosib qahramoningizni yurgizasiz, guruhlarga (piyoda/kamonchi/otliq) "Hujum", "Turing", "Oldinga", "Orqaga" buyruqlarini berasiz. Qamalda askarlar narvon bilan devorga chiqadi.
+- Obro' 25+ bo'lsa, biror hukmdorga vassal bo'lasiz yoki mustaqil qolib, qal'alarni bosib olib o'z davlatingizni qurasiz. Yerlar haftalik soliq beradi; askarlar maosh oladi; oziq har kuni kamayadi.
 - Progress telefonda va Telegram bulutida (CloudStorage) saqlanadi.
-- Xaritada 12 ta kompyuter boshqaradigan beklik bor. Uzoqdagilari kuchliroq va vaqt o'tishi bilan ular ham qo'shin to'playdi.
-- Do'stlar bilan urush "Jang kodi" orqali bo'ladi (Yana → Jang kodi):
-  1. Siz kod yaratib, Telegramda yuborasiz.
-  2. Do'stingiz kodni kiritib hujum qiladi va sizga natija kodini qaytaradi.
-  3. Siz natija kodini kiritasiz. Jang ikkala telefonda aynan bir xil hisoblanadi, kodni soxtalashtirib yoki qayta ishlatib bo'lmaydi.
-- O'yin tezligini Sozlamalarda o'zgartirish mumkin: x1–x60.
+- Do'st bilan jang (Yana → Do'st bilan jang): siz chaqiruv kodini yuborasiz, do'stingiz kiritib jangni ko'radi va javob kodini qaytaradi, so'ng jang sizda ham aynan bir xil ko'rsatiladi. Kodni soxtalashtirib yoki qayta ishlatib bo'lmaydi.
 
 **Telegram botga ulash:** @BotFather → `/mybots` → bot → **Bot Settings → Menu Button** → URL: `https://ibrohimisroilov0706-ctrl.github.io/Rabot/play/`.
 
-Oflayn rejimda xizmat shartnomalari, diplomatiya va suiqasd yo'q, ular server talab qiladi. Server olganingizda pastdagi onlayn rejimga o'tasiz.
+Onlayn (serverli) rejim avvalgidek shahar qurish, xizmat shartnomalari va suiqasd bilan ishlaydi; lord rejimi hozircha faqat oflayn.
 
 ## Ishga tushirish: GitHub'ga push → o'yin ishlaydi
 

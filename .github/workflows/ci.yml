@@ -38,6 +38,7 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm test -w @qirolliklar/game-rules
+      - run: npm test -w @qirolliklar/client
       - run: npm test -w @qirolliklar/server
         env:
           TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/qirolliklar_test

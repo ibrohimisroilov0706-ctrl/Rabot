@@ -9,7 +9,7 @@
     "dev:server": "npm run dev -w @qirolliklar/server",
     "dev:client": "npm run dev -w @qirolliklar/client",
     "build": "npm run build -w @qirolliklar/server && npm run build -w @qirolliklar/client",
-    "test": "npm test -w @qirolliklar/game-rules && npm test -w @qirolliklar/server",
+    "test": "npm test -w @qirolliklar/game-rules && npm test -w @qirolliklar/client && npm test -w @qirolliklar/server",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "migrate": "npm run migrate -w @qirolliklar/server"
   }

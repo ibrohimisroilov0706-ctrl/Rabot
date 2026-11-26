@@ -152,6 +152,7 @@ function onState(m: Me) {
 
 async function boot() {
   initTelegram();
+  if (OFFLINE) { (await import('./lord/app.js')).startLord(); return; }
   mount($('#panel'), h('div', { class: 'splash' }, h('h1', {}, 'QIROLLIKLAR'), h('p', {}, 'Yuklanmoqda…')));
   $('#panel').classList.remove('hidden');
   try {
