@@ -1,0 +1,5 @@
+# deploy/Caddyfile — avtomatik HTTPS (Let's Encrypt). DOMAIN .env dan olinadi.
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy app:8080
+}
