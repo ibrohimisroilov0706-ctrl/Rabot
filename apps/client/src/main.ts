@@ -128,9 +128,10 @@ function onState(m: Me) {
     hideScenes(); $('#sheet').classList.add('hidden');
     const panel = $('#panel'); panel.classList.remove('hidden'); renderOnboarding(panel); return;
   }
+  const firstLoad = lastKingdom !== m.kingdom.id; // promise ichida emas: pastda lastKingdom o'zgaradi
   void scenes()!.then(s => {
     s.city.setCity(m.kingdom!.culture, m.city.buildings, m.city.slots, m.queue.map(q => q.building_id));
-    if (lastKingdom !== m.kingdom!.id) { s.world.centerOn(m.city.x, m.city.y); }
+    if (firstLoad) s.world.centerOn(m.city.x, m.city.y);
   });
   if (lastKingdom !== m.kingdom.id) { lastKingdom = m.kingdom.id; void go('city'); return; }
   if (screen === 'city') renderCitySheet($('#sheet'), m);

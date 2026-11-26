@@ -358,7 +358,7 @@ function createKingdom(b: { name: string; culture: Culture; cityName: string; ru
   S.commanders = [{ id: uid('g'), name: RULERS[b.culture][1]!, skill: 5, prestige: 50, wins: 0, losses: 0 }];
   S.heirs = [{ id: uid('h'), name: RULERS[b.culture][2]!, birthAt: now - 10 * 24 * HOUR, orderRank: 1 }];
   makeNpcs(x, y);
-  notify('xush', 'Qirolligingiz tashkil topdi!', 'Atrofda 12 ta raqib beklik bor. Xaritadan tanlab hujum qiling.');
+  notify('xush', 'Xush kelibsiz, hukmdor!', 'Atrofda 12 ta raqib beklik bor. Xaritadan tanlab hujum qiling.');
   save();
   return { kingdomId: S.kingdom.id, cityId: S.city.id, x, y };
 }
