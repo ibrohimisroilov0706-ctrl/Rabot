@@ -47,6 +47,31 @@ qirolliklar/
 ├── Dockerfile, docker-compose.yml, .github/workflows/ci.yml (test + deploy)
 ```
 
+## 3D rejim (1-bosqich)
+
+O'yin ochilganda bosh menyu chiqadi: **O'YNASH → sivilizatsiya tanlash → 3D jang**.
+
+- **6 sivilizatsiya:** Temuriylar, Boburiylar (Mug'al), Xitoy, Usmonli, Angliya, Rus. Har birining kiyimi, dubulg'asi, qalqoni, bayrog'i va jangdagi ustunligi bor.
+- **Uchinchi shaxs kamerasi,** yurish va yugurish. Qilich jangi: zarba, qalqon bilan to'sish, chidamlilik. NPC askarlar ittifoqchi va dushman bo'lib jang qiladi, buyruqlarga bo'ysunadi.
+- **Telefonda boshqaruv:**
+  - chap tomonda barmoq — yurish;
+  - o'ng tomonda surish — kamera;
+  - ⚔ — zarba, 🛡 bosib turish — to'sish, 🏃 — yugurish.
+- **Kompyuterda boshqaruv:**
+  - WASD — yurish, Shift — yugurish;
+  - ekranni bosing, so'ng sichqoncha bilan kamerani aylantiring;
+  - chap tugma yoki Probel — zarba, o'ng tugma yoki Q — to'sish;
+  - 1–4 — buyruqlar, Esc — pauza.
+- Keyingi bosqichlar va nima hali tayyor emasligi: [TODO.md](TODO.md).
+
+**Mahalliy ishga tushirish:**
+
+```bash
+npm install
+VITE_OFFLINE=1 npm run dev -w @qirolliklar/client   # http://localhost:5173
+npm test -w @qirolliklar/client                      # jang mantiqi testlari
+```
+
 ## Oflayn rejim: serversiz o'ynash (eng oson)
 
 O'yin: **https://ibrohimisroilov0706-ctrl.github.io/Rabot/play/**

@@ -12,7 +12,9 @@ import { count, dayOf, HOURS_PER_SEC, maxParty, newWorld, partyById, player, set
 
 let waitBtn: HTMLButtonElement;
 
-export async function startLord() {
+export const hasLordSave = () => { try { return !!localStorage.getItem(SAVE_KEY); } catch { return false; } };
+
+export async function startLord(open?: 'army' | 'empire') {
   document.body.classList.add('lord');
   $('#panel').classList.add('hidden'); $('#sheet').classList.add('hidden');
   let raw: string | null = null;
@@ -20,7 +22,7 @@ export async function startLord() {
   if (!raw && inTelegram) raw = await cloudLoad('lrd').catch(() => null);
   let w: World | null = null;
   try { const o = raw ? JSON.parse(raw) : null; if (o && o.v === 2) w = o; } catch { /* */ }
-  if (w) run(w);
+  if (w) { run(w); if (open === 'army') setTimeout(partyScreen, 300); if (open === 'empire') setTimeout(fiefScreen, 300); }
   else onboarding((name: string, cu: Culture) => { const nw = newWorld(name, cu); run(nw); setTimeout(helpScreen, 400); });
 }
 

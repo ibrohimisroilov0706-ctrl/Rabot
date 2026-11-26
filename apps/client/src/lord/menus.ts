@@ -299,6 +299,7 @@ export function moreScreen(onReset: () => void) {
       btn('📰 Xabarlar', () => setTimeout(logScreen, 10)),
       btn('🤝 Do‘st bilan jang (kod)', () => setTimeout(duelScreen, 10)),
       btn('❓ Qanday o‘ynash', () => setTimeout(helpScreen, 10)),
+      btn('🏠 Bosh menyu', () => { save(); location.reload(); }),
     ),
     h('h4', {}, 'Xaritada vaqt tezligi'), h('div', { class: 'row-btns' }, ...speeds),
     h('h4', {}, 'Saqlash'),

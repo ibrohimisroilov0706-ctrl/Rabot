@@ -152,7 +152,12 @@ function onState(m: Me) {
 
 async function boot() {
   initTelegram();
-  if (OFFLINE) { (await import('./lord/app.js')).startLord(); return; }
+  if (OFFLINE) {
+    const lord = await import('./lord/app.js');
+    const { showMainMenu } = await import('./g3d/menu.js');
+    showMainMenu({ worldMap: () => void lord.startLord(), empire: () => void lord.startLord('empire'), army: () => void lord.startLord('army'), hasWorld: lord.hasLordSave });
+    return;
+  }
   mount($('#panel'), h('div', { class: 'splash' }, h('h1', {}, 'QIROLLIKLAR'), h('p', {}, 'Yuklanmoqda…')));
   $('#panel').classList.remove('hidden');
   try {
