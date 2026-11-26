@@ -1,7 +1,7 @@
 // apps/client/src/screens/palace.ts
 // Saroy: hukmdor, merosxo'rlar, mehmonlar, agentlar va suiqasd, xizmat shartnomalari (sadoqat bilan).
 
-import { api } from '../api.js';
+import { OFFLINE, api } from '../api.js';
 import { buildingIcon } from '../art/buildings.js';
 import { h, modal, mount, numberInput, toast } from '../dom.js';
 import { STATUS_NAME, UNIT_ICON } from '../i18n.js';
@@ -63,13 +63,14 @@ export function renderPalace(root: HTMLElement, m: Me) {
           h('button', { class: 'btn small', onClick: async () => { await api('POST', '/api/king/home'); toast('Qirol saroyiga qaytdi', 'ok'); await refresh(); } }, 'Uyga qaytish')) : null)),
     h('section', { class: 'card' }, h('h3', {}, 'Merosxo‘rlar'),
       ...(m.intrigue.heirs.length ? m.intrigue.heirs.map((x: any) => h('div', { class: 'qrow' }, h('span', {}, `${x.order_rank}. ${x.name}`), h('small', {}, `${x.age} yosh${x.age < 16 ? ' (voyaga yetmagan)' : ''}`))) : [h('p', { class: 'warn' }, 'Merosxo‘r yo‘q: qirol o‘lsa taxt inqirozi!')])),
-    h('section', { class: 'card' }, h('h3', {}, 'Xizmat shartnomalari'), ...(services.length ? services.map(svcRow) : [h('p', { class: 'muted' }, 'Hozircha yo‘q. Xaritada boshqa qirolni tanlab, xizmatga kirishingiz mumkin.')])),
-    h('section', { class: 'card' }, h('h3', {}, 'Saroyingizdagi mehmonlar'),
+    OFFLINE ? h('section', { class: 'card' }, h('h3', {}, 'Oflayn rejim'), h('p', { class: 'muted' }, 'Xizmat shartnomalari, mehmonlik va suiqasd onlayn (server) rejimida ishlaydi. Hozir bekliklarga hujum qiling va do‘stlar bilan “Jang kodi” orqali urushing.')) : null,
+    OFFLINE ? null : h('section', { class: 'card' }, h('h3', {}, 'Xizmat shartnomalari'), ...(services.length ? services.map(svcRow) : [h('p', { class: 'muted' }, 'Hozircha yo‘q. Xaritada boshqa qirolni tanlab, xizmatga kirishingiz mumkin.')])),
+    OFFLINE ? null : h('section', { class: 'card' }, h('h3', {}, 'Saroyingizdagi mehmonlar'),
       ...(m.intrigue.guests.length ? m.intrigue.guests.map((g: any) => h('p', {}, `👑 ${g.ruler_name} (${g.name})`)) : [h('p', { class: 'muted' }, 'Mehmon yo‘q')]),
       h('p', { class: 'muted small' }, 'Saroy egasiga o‘z saroyida suiqasd qilib bo‘lmaydi.')),
-    h('section', { class: 'card' }, h('h3', {}, 'Agentlar'),
+    OFFLINE ? null : h('section', { class: 'card' }, h('h3', {}, 'Agentlar'),
       ...m.intrigue.agents.map((a: any) => h('div', { class: 'qrow' }, h('span', {}, `🕵 ${a.name}`), h('small', {}, `mahorat ${a.skill} · ${a.state}`))),
       h('button', { class: 'btn small', onClick: async () => { try { await api('POST', '/api/intrigue/agents'); toast('Agent yollandi (400 oltin)', 'ok'); await refresh(); } catch (e) { toast((e as Error).message, 'err'); } } }, '+ Agent yollash (400 🪙)')),
-    h('section', { class: 'card' }, h('h3', {}, 'Mehmonlikdagi qirollar'),
+    OFFLINE ? null : h('section', { class: 'card' }, h('h3', {}, 'Mehmonlikdagi qirollar'),
       ...(m.intrigue.visitingKings.length ? m.intrigue.visitingKings.map((v: any) => h('div', { class: 'qrow' }, h('span', {}, `👑 ${v.ruler_name} (${v.name}) → ${v.host_name}`), h('button', { class: 'btn small red', onClick: () => assassinModal(m, v) }, 'Suiqasd'))) : [h('p', { class: 'muted' }, 'Hozir hech kim mehmonlikda emas')]))));
 }

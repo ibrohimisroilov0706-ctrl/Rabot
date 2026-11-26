@@ -47,6 +47,26 @@ qirolliklar/
 ├── Dockerfile, docker-compose.yml, .github/workflows/ci.yml (test + deploy)
 ```
 
+## Oflayn rejim: serversiz o'ynash (eng oson)
+
+O'yin: **https://ibrohimisroilov0706-ctrl.github.io/Rabot/play/**
+
+Server, VPS yoki telefonni yoqiq ushlab turish shart emas. Har push'da GitHub o'yinni o'zi build qiladi (`play/` papkasi).
+
+**Qanday ishlaydi:**
+- Har bir o'yinchi o'z shahrini o'z telefonida rivojlantiradi.
+- Progress telefonda va Telegram bulutida (CloudStorage) saqlanadi.
+- Xaritada 12 ta kompyuter boshqaradigan beklik bor. Uzoqdagilari kuchliroq va vaqt o'tishi bilan ular ham qo'shin to'playdi.
+- Do'stlar bilan urush "Jang kodi" orqali bo'ladi (Yana → Jang kodi):
+  1. Siz kod yaratib, Telegramda yuborasiz.
+  2. Do'stingiz kodni kiritib hujum qiladi va sizga natija kodini qaytaradi.
+  3. Siz natija kodini kiritasiz. Jang ikkala telefonda aynan bir xil hisoblanadi, kodni soxtalashtirib yoki qayta ishlatib bo'lmaydi.
+- O'yin tezligini Sozlamalarda o'zgartirish mumkin: x1–x60.
+
+**Telegram botga ulash:** @BotFather → `/mybots` → bot → **Bot Settings → Menu Button** → URL: `https://ibrohimisroilov0706-ctrl.github.io/Rabot/play/`.
+
+Oflayn rejimda xizmat shartnomalari, diplomatiya va suiqasd yo'q, ular server talab qiladi. Server olganingizda pastdagi onlayn rejimga o'tasiz.
+
 ## Ishga tushirish: GitHub'ga push → o'yin ishlaydi
 
 Bir marta sozlanadi, keyin har `git push` da o'zi yangilanadi.

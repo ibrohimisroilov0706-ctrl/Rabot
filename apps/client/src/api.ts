@@ -8,6 +8,8 @@ let token: string | null = null;
 try { token = localStorage.getItem(TOKEN_KEY); } catch { /* WebView cheklovi */ }
 
 export const API_BASE = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_API_URL ?? '';
+/** Oflayn rejim: VITE_OFFLINE=1 bilan build qilinganda server kerak emas, o'yin telefonda ishlaydi */
+export const OFFLINE = (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_OFFLINE === '1';
 
 export function setToken(t: string | null) {
   token = t;
@@ -18,6 +20,15 @@ export const getToken = () => token;
 export class ApiError extends Error { constructor(public status: number, public code: string, message: string, public details?: any) { super(message); } }
 
 export async function api<T = any>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
+  if (OFFLINE) {
+    const { localApi } = await import('./offline/engine.js');
+    try { return await localApi(method, path, body) as T; }
+    catch (e: any) {
+      let msg = e.message ?? 'Xato';
+      if (e.code === 'not_enough_resources' && e.details?.missing) msg += ': ' + Object.entries(e.details.missing).map(([k, v]) => `${k} ${v}`).join(', ');
+      throw new ApiError(e.status ?? 400, e.code ?? 'error', msg, e.details);
+    }
+  }
   const r = await fetch(API_BASE + path, {
     method,
     headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },

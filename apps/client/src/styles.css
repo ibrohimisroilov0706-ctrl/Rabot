@@ -162,3 +162,8 @@ label > input, label > select { margin-top: 4px; }
 .toast.out { opacity: 0; transform: translateY(-8px); }
 
 @media (min-width: 700px) { .res b { font-size: 15px; } #sheet { left: auto; width: 420px; } }
+
+/* ---- jang kodi */
+textarea { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(212,165,55,.35); background: rgba(0,0,0,.25); color: var(--text); font: 12px/1.3 ui-monospace, monospace; resize: vertical; }
+.codebox { background: rgba(212,165,55,.1); border: 1px dashed var(--oltin); border-radius: var(--radius); padding: 10px; margin: 10px 0; }
+.codebox textarea { margin: 6px 0; word-break: break-all; }

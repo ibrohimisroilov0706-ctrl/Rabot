@@ -2,7 +2,7 @@
 // Xaritada tanlangan shahar uchun pastki varaq: hujum, mehmon bo'lish, xizmat taklifi, diplomatiya.
 
 import { terrainAt, unitDef } from '@qirolliklar/game-rules';
-import { api } from '../api.js';
+import { OFFLINE, api } from '../api.js';
 import { fmt, h, modal, mount, numberInput, toast } from '../dom.js';
 import { CULTURE_NAME, STATUS_NAME, TERRAIN_NAME, TREATY_NAME, UNIT_ICON } from '../i18n.js';
 import type { WorldCity } from '../scenes/WorldScene.js';
@@ -84,7 +84,9 @@ export async function renderCityCard(root: HTMLElement, c: WorldCity | null) {
   const mine = c.kingdom_id === me?.kingdom?.id;
   mount(root, h('div', { class: 'sheet-head' }, h('b', {}, c.name), h('span', { class: 'chip' }, CULTURE_NAME[c.culture]), c.shielded ? h('span', { class: 'chip blue' }, '🛡 qalqon') : null),
     h('p', {}, `${c.kingdom_name} · hukmdor ${c.ruler_name} · aholi ${fmt(c.population)} · saroy ${c.palace}`), h('p', { class: 'muted small' }, `(${c.x}, ${c.y}) · ${TERRAIN_NAME[terrainAt(c.x, c.y)]}`),
-    mine ? h('p', { class: 'muted' }, 'Bu sizning poytaxtingiz.') : h('div', { class: 'actions' },
+    mine ? h('p', { class: 'muted' }, 'Bu sizning poytaxtingiz.') : OFFLINE ? h('div', { class: 'actions' },
+      h('button', { class: 'btn red', onClick: () => attackModal(c) }, '⚔ Hujum'),
+      h('small', { class: 'muted' }, 'Bekliklar vaqt o‘tishi bilan qo‘shin to‘playdi. Uzoqdagilari kuchliroq.')) : h('div', { class: 'actions' },
       h('button', { class: 'btn red', onClick: () => attackModal(c) }, '⚔ Hujum'),
       h('button', { class: 'btn', onClick: async () => { try { await api('POST', '/api/king/visit', { cityId: c.id }); toast('Qirolingiz mehmonga ketdi. Ehtiyot bo‘ling: mehmon qirolga suiqasd qilish mumkin!', 'info'); await refresh(); } catch (e) { toast((e as Error).message, 'err'); } } }, '🏰 Mehmon bo‘lish'),
       h('button', { class: 'btn', onClick: () => serviceModal(c) }, '🤝 Xizmatga kirish'),

@@ -2,7 +2,7 @@
 // Ilova: kirish (Telegram initData yoki dev), yuqorida resurslar, pastda navigatsiya, ekranlar, realtime.
 
 import './styles.css';
-import { api, getToken, setToken, wsUrl } from './api.js';
+import { OFFLINE, api, getToken, setToken, wsUrl } from './api.js';
 import { $, h, mount, startCountdowns, toast, fmt } from './dom.js';
 import { showScene, hideScenes, scenes, startGame } from './game.js';
 import { RES } from './i18n.js';
@@ -12,21 +12,37 @@ import { renderCityCard } from './screens/map.js';
 import { renderOnboarding } from './screens/onboarding.js';
 import { renderPalace } from './screens/palace.js';
 import { renderDiplomacy, renderHistory, renderKingdoms, renderMessages, renderSettings, renderTrade } from './screens/others.js';
+import { renderDuel } from './screens/duel.js';
 import { liveResource, me, refresh, subscribe, type Me } from './store.js';
 import { haptic, inTelegram, initTelegram, setBack, tg } from './telegram.js';
 
-type Screen = 'map' | 'city' | 'army' | 'palace' | 'more' | 'diplomacy' | 'trade' | 'kingdoms' | 'messages' | 'history' | 'settings';
+type Screen = 'map' | 'city' | 'army' | 'palace' | 'more' | 'diplomacy' | 'trade' | 'kingdoms' | 'messages' | 'history' | 'settings' | 'duel';
 let screen: Screen = 'city';
 const NAV: { key: Screen; icon: string; label: string }[] = [
   { key: 'map', icon: '🗺', label: 'Xarita' }, { key: 'city', icon: '🏙', label: 'Shahar' }, { key: 'army', icon: '⚔', label: 'Armiya' },
   { key: 'palace', icon: '👑', label: 'Saroy' }, { key: 'more', icon: '☰', label: 'Yana' },
 ];
-const MORE: { key: Screen; icon: string; label: string }[] = [
+const MORE: { key: Screen; icon: string; label: string }[] = OFFLINE ? [
+  { key: 'duel', icon: '⚔', label: 'Jang kodi' }, { key: 'trade', icon: '⚖', label: 'Savdo' }, { key: 'kingdoms', icon: '🏰', label: 'Raqiblar' },
+  { key: 'messages', icon: '✉', label: 'Xabarlar' }, { key: 'history', icon: '📖', label: 'Tarix' }, { key: 'settings', icon: '⚙', label: 'Sozlamalar' },
+] : [
   { key: 'diplomacy', icon: '📜', label: 'Diplomatiya' }, { key: 'trade', icon: '⚖', label: 'Savdo' }, { key: 'kingdoms', icon: '🏰', label: 'Qirolliklar' },
   { key: 'messages', icon: '✉', label: 'Xabarlar' }, { key: 'history', icon: '📖', label: 'Tarix' }, { key: 'settings', icon: '⚙', label: 'Sozlamalar' },
 ];
 
+async function initOffline() {
+  const eng = await import('./offline/engine.js');
+  const cloud = await import('./offline/cloud.js');
+  let raw: string | null = null;
+  try { raw = localStorage.getItem('qrl_offline_v1'); } catch { /* */ }
+  if (!raw && inTelegram) raw = await cloud.cloudLoad().catch(() => null);
+  eng.loadState(raw);
+  eng.onSaved(st => cloud.cloudSave(JSON.stringify(st)));
+  window.addEventListener('qrl-notify', e => { toast((e as CustomEvent).detail.title); haptic('medium'); });
+}
+
 async function login() {
+  if (OFFLINE) return initOffline();
   if (getToken()) return;
   if (inTelegram) { const r = await api('POST', '/api/auth/telegram', { initData: tg!.initData }); setToken(r.token); return; }
   const cfg = await api('GET', '/api/config');
@@ -84,10 +100,12 @@ async function go(s: Screen) {
     else if (s === 'messages') { await renderMessages(panel); await refresh(); }
     else if (s === 'history') await renderHistory(panel, m);
     else if (s === 'settings') renderSettings(panel, m);
+    else if (s === 'duel') renderDuel(panel, m);
   } catch (e) { toast((e as Error).message, 'err'); }
 }
 
 function connectRealtime() {
+  if (OFFLINE) return; // oflaynda xabarlar lokal hodisa orqali keladi
   let delay = 1000;
   const open = () => {
     const ws = new WebSocket(wsUrl());

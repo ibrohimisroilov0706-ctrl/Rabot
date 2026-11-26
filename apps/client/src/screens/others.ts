@@ -1,10 +1,10 @@
 // apps/client/src/screens/others.ts
 // Diplomatiya, savdo, qirolliklar, xabarlar, tarix va sozlamalar ekranlari.
 
-import { api, setToken } from '../api.js';
+import { OFFLINE, api, setToken } from '../api.js';
 import { fmt, h, modal, mount, numberInput, toast } from '../dom.js';
 import { CULTURE_COLOR, CULTURE_NAME, RES, TERRAIN_NAME, TREATY_NAME, UNIT_ICON, WEATHER_NAME } from '../i18n.js';
-import { refresh, type Me } from '../store.js';
+import { me, refresh, type Me } from '../store.js';
 import { diplomacyModal } from './map.js';
 
 const when = (s: string) => new Date(s).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
@@ -89,13 +89,35 @@ export async function renderHistory(root: HTMLElement, m: Me) {
 }
 
 export function renderSettings(root: HTMLElement, m: Me) {
+  const offline = OFFLINE ? h('section', { class: 'card' }, h('h3', {}, 'Oflayn rejim'),
+    h('p', { class: 'small' }, 'O‘yin tezligi (vaqt necha barobar tez o‘tadi):'),
+    h('div', { class: 'actions' }, ...[1, 5, 10, 30, 60].map(v => h('button', {
+      class: `btn small${m.gameSpeed === v ? ' gold' : ''}`, onClick: async () => { await api('POST', '/api/offline/speed', { speed: v }); toast(`Tezlik x${v}`, 'ok'); await refresh(); renderSettings(root, me ?? m); },
+    }, `x${v}`))),
+    h('p', { class: 'muted small' }, 'Progress telefoningizda va Telegram bulutida saqlanadi.'),
+    h('div', { class: 'actions' },
+      h('button', { class: 'btn small', onClick: async () => {
+        const { exportState } = await import('../offline/engine.js');
+        try { await navigator.clipboard.writeText(exportState()); toast('Zaxira nusxa nusxalandi', 'ok'); } catch { toast('Nusxalab bo‘lmadi', 'err'); }
+      } }, '💾 Zaxira nusxa'),
+      h('button', { class: 'btn small', onClick: () => {
+        const ta = h('textarea', { rows: 5, placeholder: 'Zaxira nusxani qo‘ying' }) as HTMLTextAreaElement;
+        modal('Zaxiradan tiklash', ta, [{ label: 'Tiklash', kind: 'gold', onClick: async () => {
+          JSON.parse(ta.value);
+          localStorage.setItem('qrl_offline_v1', ta.value); location.reload();
+        } }]);
+      } }, '♻ Tiklash'),
+      h('button', { class: 'btn small red', onClick: () => modal('O‘yinni qaytadan boshlash', h('p', {}, 'Butun progress o‘chadi. Ishonchingiz komilmi?'), [{
+        label: 'Ha, o‘chirish', kind: 'red', onClick: async () => { await api('POST', '/api/offline/reset'); location.reload(); },
+      }]) }, '🗑 Qaytadan boshlash'))) : null;
   mount(root, h('div', { class: 'page' }, h('h2', {}, 'Sozlamalar'),
-    h('section', { class: 'card' }, h('p', {}, `Qirollik: ${m.kingdom?.name}`), h('p', {}, `Millat: ${m.kingdom ? CULTURE_NAME[m.kingdom.culture] : ''}`), h('p', {}, `O‘yin tezligi: x${m.gameSpeed}`), h('p', { class: 'muted small' }, `Server vaqti: ${when(m.serverTime)}`)),
+    h('section', { class: 'card' }, h('p', {}, `Qirollik: ${m.kingdom?.name}`), h('p', {}, `Millat: ${m.kingdom ? CULTURE_NAME[m.kingdom.culture] : ''}`), h('p', {}, `O‘yin tezligi: x${m.gameSpeed}`), h('p', { class: 'muted small' }, `${OFFLINE ? 'Vaqt' : 'Server vaqti'}: ${when(m.serverTime)}`)),
+    offline,
     h('section', { class: 'card' }, h('h3', {}, 'Qoidalar qisqacha'),
       h('ul', { class: 'small' },
-        h('li', {}, 'Qo‘shin egaligi hech qachon o‘zgarmaydi. Xizmat shartnomasi faqat buyruq huquqini beradi.'),
-        h('li', {}, 'Boshqa millat qo‘shini: mag‘lubiyatlar ko‘p bo‘lsa askarlarning 50% i qochadi, g‘alabalar ko‘p bo‘lsa mustaqillik talab qiladi.'),
-        h('li', {}, 'Faqat boshqa saroyda mehmon bo‘lgan qirolga suiqasd qilish mumkin.'),
-        h('li', {}, 'Merosxo‘r yo‘q bo‘lsa va zodagonlar norozi bo‘lsa, fuqarolar urushi boshlanadi.'))),
-    h('button', { class: 'btn', onClick: () => { setToken(null); location.reload(); } }, 'Chiqish (sessiyani tozalash)')));
+        h('li', {}, 'Binolar saroy darajasidan baland bo‘lmaydi. Saroyni ko‘tarish uchun ombor kerak.'),
+        h('li', {}, 'Nayzachi otliqni, otliq kamonchini, kamonchi piyodani, piyoda nayzachini yengadi.'),
+        h('li', {}, 'Oziq tugasa aholi kamayadi va qo‘shin kuchi 30% ga tushadi.'),
+        h('li', {}, OFFLINE ? 'Do‘stlar bilan “Jang kodi” orqali urushing: jang natijasi ikkala telefonda bir xil chiqadi.' : 'Qo‘shin egaligi hech qachon o‘zgarmaydi. Xizmat shartnomasi faqat buyruq huquqini beradi.'))),
+    OFFLINE ? null : h('button', { class: 'btn', onClick: () => { setToken(null); location.reload(); } }, 'Chiqish (sessiyani tozalash)')));
 }
