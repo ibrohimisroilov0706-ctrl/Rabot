@@ -85,6 +85,28 @@ Birinchi deploy 5–8 daqiqa davom etadi. Oxirgi qadam logida o'yin manzili chiq
 
 Qo'lda (GitHub'siz): serverda `TELEGRAM_BOT_TOKEN=... bash deploy/server-deploy.sh`.
 
+## Telefonda vaqtincha ishga tushirish (Android, serversiz)
+
+Server sotib olguncha o'yinni Android telefonda ishlatish mumkin. Telefon yoqiq, internetda va Termux ochiq turishi kerak. iPhone'da bu usul ishlamaydi.
+
+1. **Termux**ni F-Droid'dan o'rnating: https://f-droid.org/packages/com.termux/ . Play Market'dagi versiya eskirgan.
+2. Termux'da quyidagilarni bajaring:
+   ```
+   pkg update -y && pkg install -y git
+   git clone https://github.com/ibrohimisroilov0706-ctrl/Rabot
+   cd Rabot
+   bash deploy/termux.sh
+   ```
+3. Skript bot tokenini so'raydi, kiriting. Token faqat telefondagi `.env.local` faylida saqlanadi. Birinchi ishga tushirish 5–15 daqiqa davom etadi.
+4. "Server ishga tushmoqda" yozuvi chiqqach, Telegramda botni oching → `/start` → **⚔️ O'ynash**.
+
+Keyingi safar ishga tushirish: `cd Rabot && bash deploy/termux.sh`. Kodni yangilash: `git pull`, keyin yana shu buyruq.
+
+Maslahatlar:
+- Telefon sozlamalarida Termux uchun **batareya tejashni o'chiring**.
+- HTTPS manzil har ishga tushirishda o'zgaradi. Server uni botga o'zi qayta ulaydi.
+- Baza telefonda qoladi. Keyin VPS'ga o'tganda o'yin yangi bazadan boshlanadi.
+
 ## Lokal ishlab chiqish
 
 Kerak: Node.js 20+ va PostgreSQL 14+ (yoki faqat bazani Docker orqali ishga tushiring).
