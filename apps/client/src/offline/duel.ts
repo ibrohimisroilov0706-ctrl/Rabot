@@ -49,6 +49,7 @@ function record(c: Challenge, att: BattleArmy, r: ReturnType<typeof resolveBattl
     terrain: 'tekislik', weather: 'ochiq', loot: {}, wall_hp_before: 0, wall_hp_after: 0,
     attacker_kingdom_id: iAmAttacker ? me.id : 'friend', attacker_name: iAmAttacker ? me.name : otherName,
     defender_kingdom_id: iAmAttacker ? 'friend' : me.id, defender_name: iAmAttacker ? otherName : me.name, city_name: `${iAmAttacker ? otherName : me.name} (duel)`,
+    attacker_culture: att.culture, defender_culture: c.from.culture,
     records: r.losses.map(l => ({ side: l.armyId === att.armyId ? 'attacker' : 'defender', unit: l.unitKey, before: l.before, lost: l.lost, kingdom: l.armyId === myId ? me.id : 'friend' })),
   });
 }
@@ -90,7 +91,7 @@ export function acceptChallenge(b: { code: string; units: Record<string, number>
   internals.notify('jang', won ? `Duelda g‘alaba: ${c.from.name}` : `Duelda mag‘lubiyat: ${c.from.name}`, `Siz ${myLost}, raqib ${enemyLost} askar yo‘qotdi${reward ? `, mukofot ${reward} oltin` : ''}. Natija kodini ${c.from.name} ga yuboring.`);
   internals.save();
   const res: Result = { t: 'r', cid: c.id, to: c.from.pid, from: { pid: S.playerId, name: k.name, culture: k.culture }, att, at: Date.now() };
-  return { winner: r.winner, won, ratio: r.ratio, myLost, enemyLost, reward, resultCode: encode(res), enemy: c.from };
+  return { winner: r.winner, won, ratio: r.ratio, myLost, enemyLost, reward, resultCode: encode(res), enemy: c.from, battle: S.battles[0] };
 }
 
 /** 3) Natija kodini qo'llash (chaqiruv egasi) */
@@ -120,5 +121,5 @@ export function applyResult(b: { code: string }) {
   S.usedCodes.push(key);
   internals.notify('jang', iWon ? `${res.from.name} hujumini qaytardingiz!` : `${res.from.name} duelda g‘olib chiqdi`, `Siz ${myLost}, raqib ${enemyLost} askar yo‘qotdi${reward ? `, mukofot ${reward} oltin` : ''}.`);
   internals.save();
-  return { winner: r.winner, won: iWon, ratio: r.ratio, myLost, enemyLost, reward, enemy: res.from };
+  return { winner: r.winner, won: iWon, ratio: r.ratio, myLost, enemyLost, reward, enemy: res.from, battle: S.battles[0] };
 }

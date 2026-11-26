@@ -6,6 +6,7 @@ import { fmt, h, modal, mount, numberInput, toast } from '../dom.js';
 import { CULTURE_COLOR, CULTURE_NAME, RES, TERRAIN_NAME, TREATY_NAME, UNIT_ICON, WEATHER_NAME } from '../i18n.js';
 import { me, refresh, type Me } from '../store.js';
 import { diplomacyModal } from './map.js';
+import { openBattle } from '../battle/viewer.js';
 
 const when = (s: string) => new Date(s).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 const loading = (root: HTMLElement) => mount(root, h('div', { class: 'page' }, h('p', { class: 'muted' }, 'Yuklanmoqda…')));
@@ -82,6 +83,7 @@ export async function renderHistory(root: HTMLElement, m: Me) {
     const side = (s: string) => (b.records ?? []).filter((r: any) => r.side === s).map((r: any) => `${UNIT_ICON[r.unit] ?? ''}${r.before}→${r.before - r.lost}`).join(' ');
     return h('details', { class: `battle ${won ? 'won' : 'lost'}` },
       h('summary', {}, h('b', {}, `${won ? '🏆' : '💀'} ${b.attacker_name} → ${b.city_name ?? b.defender_name}`), h('small', { class: 'muted' }, ` ${when(b.occurred_at)}`)),
+      h('button', { class: 'btn small gold', onClick: () => openBattle(b, { mySide: iAttacked ? 'attacker' : 'defender' }) }, '▶ Jangni ko‘rish'),
       h('p', { class: 'small' }, `Nisbat ${Number(b.ratio).toFixed(2)} · ${TERRAIN_NAME[b.terrain] ?? b.terrain} · ${WEATHER_NAME[b.weather] ?? b.weather} · devor ${b.wall_hp_before}→${b.wall_hp_after}`),
       h('p', { class: 'small' }, `Hujumchi: ${side('attacker') || '—'}`), h('p', { class: 'small' }, `Himoyachi: ${side('defender') || '—'}`),
       Object.keys(b.loot ?? {}).length ? h('p', { class: 'small' }, `O‘lja: ${Object.entries(b.loot).map(([k, v]) => `${RES[k as keyof typeof RES]?.icon ?? k}${fmt(v as number)}`).join(' ')}`) : null);

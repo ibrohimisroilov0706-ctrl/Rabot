@@ -2,7 +2,7 @@
 // Saroy: hukmdor, merosxo'rlar, mehmonlar, agentlar va suiqasd, xizmat shartnomalari (sadoqat bilan).
 
 import { OFFLINE, api } from '../api.js';
-import { buildingIcon } from '../art/buildings.js';
+import { drawPalaceScene } from '../art/palaceScene.js';
 import { h, modal, mount, numberInput, toast } from '../dom.js';
 import { STATUS_NAME, UNIT_ICON } from '../i18n.js';
 import { refresh, type Me } from '../store.js';
@@ -53,8 +53,10 @@ export function renderPalace(root: HTMLElement, m: Me) {
   };
 
   mount(root, h('div', { class: 'page palace' },
-    h('div', { class: 'palace-hero' }, buildingIcon(k.culture, 'saroy', m.city.buildings.find(b => b.key === 'saroy')?.level ?? 1, 140),
-      h('div', {}, h('h2', {}, k.rulerName), h('p', {}, `${k.name} · ${k.generation}-avlod hukmdori`),
+    (() => { const cv = document.createElement('canvas'); cv.width = 760; cv.height = 460; cv.className = 'palace-scene';
+      return drawPalaceScene(cv, k.culture, m.city.buildings.find(b => b.key === 'saroy')?.level ?? 1, `${k.name} saroyi`); })(),
+    h('div', { class: 'palace-info' },
+      h('div', {}, h('h2', {}, `👑 ${k.rulerName}`), h('p', {}, `${k.name} · ${k.generation}-avlod hukmdori`),
         h('p', { class: 'small' }, `Obro‘ ${k.reputation} · Zodagonlar sadoqati ${k.nobleLoyalty}`),
         k.regentUntil ? h('p', { class: 'warn' }, 'Regentlik: ', until(k.regentUntil)) : null,
         k.shieldUntil && Date.parse(k.shieldUntil) > Date.now() ? h('p', { class: 'small' }, '🛡 Himoya qalqoni: ', until(k.shieldUntil)) : null,

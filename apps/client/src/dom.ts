@@ -26,11 +26,13 @@ export function mount(target: HTMLElement, ...nodes: Child[]) {
   target.replaceChildren(...nodes.filter((n): n is Node | string => n !== null && n !== undefined && n !== false).map(n => (typeof n === 'number' ? String(n) : n)));
 }
 
-export function toast(text: string, kind: 'info' | 'ok' | 'err' = 'info') {
-  const el = h('div', { class: `toast ${kind}` }, text);
+export function toast(text: string, kind: 'info' | 'ok' | 'err' = 'info', action?: { label: string; onClick: () => void }) {
+  const el = h('div', { class: `toast ${kind}` }, text,
+    action ? h('button', { class: 't-act', onClick: () => { el.remove(); action.onClick(); } }, action.label) : null);
   $('#toasts').append(el);
-  setTimeout(() => el.classList.add('out'), 3200);
-  setTimeout(() => el.remove(), 3700);
+  const life = action ? 6500 : 3200;
+  setTimeout(() => el.classList.add('out'), life);
+  setTimeout(() => el.remove(), life + 500);
 }
 
 export function modal(title: string, body: Node, actions: { label: string; kind?: string; onClick: () => void | Promise<void> }[] = []) {

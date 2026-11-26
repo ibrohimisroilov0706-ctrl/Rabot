@@ -38,7 +38,18 @@ async function initOffline() {
   if (!raw && inTelegram) raw = await cloud.cloudLoad().catch(() => null);
   eng.loadState(raw);
   eng.onSaved(st => cloud.cloudSave(JSON.stringify(st)));
-  window.addEventListener('qrl-notify', e => { toast((e as CustomEvent).detail.title); haptic('medium'); });
+  setInterval(() => { if (eng.tick()) void refresh().catch(() => {}); }, 2000);
+  window.addEventListener('qrl-notify', e => {
+    const d = (e as CustomEvent).detail as { title: string; type?: string; data?: { battleId?: string } };
+    haptic('medium');
+    if (d.type === 'jang' && d.data?.battleId) {
+      toast(d.title, 'info', { label: '▶ Ko‘rish', onClick: async () => {
+        const list = await api('GET', '/api/battles');
+        const bt = list.find((x: any) => x.id === d.data!.battleId);
+        if (bt) (await import('./battle/viewer.js')).openBattle(bt, { mySide: 'attacker' });
+      } });
+    } else toast(d.title);
+  });
 }
 
 async function login() {

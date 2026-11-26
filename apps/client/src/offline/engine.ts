@@ -73,6 +73,14 @@ function save() {
 }
 export function resetState() { S = fresh(); save(); }
 export const state = () => S;
+/** Muddati kelgan voqealarni (qurilish, yollash, yurish/jang) darhol hal qiladi. */
+export function tick(): boolean {
+  if (!S?.city) return false;
+  const now = Date.now();
+  const due = S.queue.some(q => q.finishesAt <= now) || S.recruits.some(r => r.dueAt <= now) || S.armies.some(a => a.arriveAt <= now);
+  if (due) { advance(now); save(); }
+  return due;
+}
 
 const uid = (p: string) => `${p}-${S.playerId}-${(++S.seq).toString(36)}`;
 const iso = (t: number) => new Date(t).toISOString();
@@ -82,7 +90,7 @@ const sum = (u: Record<string, number>) => Object.values(u).reduce((a, b) => a +
 function notify(type: string, title: string, body = '', data: Record<string, unknown> = {}) {
   S.notifications.unshift({ id: uid('n'), type, title, body, read_at: null, created_at: iso(Date.now()), data });
   S.notifications = S.notifications.slice(0, 100);
-  window.dispatchEvent(new CustomEvent('qrl-notify', { detail: { title } }));
+  window.dispatchEvent(new CustomEvent('qrl-notify', { detail: { title, type, data } }));
 }
 
 // ---------------------------------------------------------------- shahar simulyatsiyasi
@@ -260,11 +268,12 @@ function arrive(id: string, t: number) {
   const ratio = Number.isFinite(r.ratio) ? Math.min(r.ratio, 999) : 999;
   S.battles.unshift({ id: battleId, occurred_at: iso(t), winner: r.winner, ratio, terrain, weather, loot, wall_hp_before: wallBefore, wall_hp_after: wallAfter,
     attacker_kingdom_id: S.kingdom!.id, attacker_name: S.kingdom!.name, defender_kingdom_id: n.id, defender_name: n.name, city_name: n.name,
+    attacker_culture: S.kingdom!.culture, defender_culture: n.culture,
     records: r.losses.map(l => ({ side: l.armyId === a.id ? 'attacker' : 'defender', unit: l.unitKey, before: l.before, lost: l.lost, kingdom: l.armyId === a.id ? S.kingdom!.id : n.id })) });
   S.battles = S.battles.slice(0, 50);
   const lostA = r.losses.filter(l => l.armyId === a.id).reduce((s, l) => s + l.lost, 0);
   const lostD = r.losses.filter(l => l.armyId === defId).reduce((s, l) => s + l.lost, 0);
-  notify('jang', won ? `G‘alaba: ${n.name}` : `Mag‘lubiyat: ${n.name}`, `Nisbat ${ratio.toFixed(2)}. Siz ${lostA}, dushman ${lostD} askar yo‘qotdi.`);
+  notify('jang', won ? `G‘alaba: ${n.name}` : `Mag‘lubiyat: ${n.name}`, `Nisbat ${ratio.toFixed(2)}. Siz ${lostA}, dushman ${lostD} askar yo‘qotdi.`, { battleId });
   sendBack(a, t);
 }
 

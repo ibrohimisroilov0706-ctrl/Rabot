@@ -6,6 +6,7 @@ import { h, mount, toast } from '../dom.js';
 import { refresh, type Me } from '../store.js';
 import { haptic, tg } from '../telegram.js';
 import { unitPicker } from './map.js';
+import { openBattle } from '../battle/viewer.js';
 
 async function copy(text: string) {
   try { await navigator.clipboard.writeText(text); toast('Nusxalandi', 'ok'); }
@@ -50,6 +51,7 @@ export function renderDuel(root: HTMLElement, m: Me) {
         haptic(r.won ? 'success' : 'error');
         toast(r.won ? `G‘alaba! Mukofot ${r.reward} oltin` : 'Mag‘lubiyat', r.won ? 'ok' : 'err');
         await refresh();
+        if (r.battle) openBattle(r.battle, { mySide: 'attacker' });
         mount(out, h('div', { class: 'card' }, h('p', {}, `${r.won ? '🏆 G‘alaba' : '💀 Mag‘lubiyat'} — ${r.enemy.name}. Siz ${r.myLost}, raqib ${r.enemyLost} askar yo‘qotdi.`)),
           codeBox(r.resultCode, 'Natija kodi (raqibga yuboring)', `QIROLLIKLAR duel natijasi. “Jang kodi” → “Natijani kiritish” ga qo‘ying:`));
       } catch (e) { toast((e as Error).message, 'err'); }
@@ -65,6 +67,7 @@ export function renderDuel(root: HTMLElement, m: Me) {
         haptic(r.won ? 'success' : 'error');
         toast(r.won ? `Hujum qaytarildi! +${r.reward} oltin` : `${r.enemy.name} yutdi`, r.won ? 'ok' : 'err');
         await refresh();
+        if (r.battle) openBattle(r.battle, { mySide: 'defender' });
         mount(out, h('div', { class: 'card' }, h('p', {}, `${r.won ? '🛡 Himoya muvaffaqiyatli' : '💀 Mag‘lubiyat'} — ${r.enemy.name}. Siz ${r.myLost}, raqib ${r.enemyLost} askar yo‘qotdi.`)));
       } catch (e) { toast((e as Error).message, 'err'); }
     } }, 'Natijani qo‘llash'));

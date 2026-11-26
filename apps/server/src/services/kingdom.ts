@@ -126,7 +126,7 @@ export async function kingdomPublic(t: Tx, me: string | undefined, id: string) {
 export async function battles(t: Tx, me: string) {
   return many(t, `
     SELECT b.id, b.occurred_at, b.winner, b.ratio, b.terrain, b.weather, b.loot, b.wall_hp_before, b.wall_hp_after,
-      b.attacker_kingdom_id, ka.name AS attacker_name, b.defender_kingdom_id, kd.name AS defender_name, c.name AS city_name,
+      b.attacker_kingdom_id, ka.name AS attacker_name, b.defender_kingdom_id, kd.name AS defender_name, ka.culture AS attacker_culture, kd.culture AS defender_culture, c.name AS city_name,
       (SELECT jsonb_agg(jsonb_build_object('side', r.side, 'unit', r.unit_key, 'before', r.before, 'lost', r.lost, 'kingdom', r.kingdom_id))
          FROM battle_records r WHERE r.battle_id = b.id) AS records
     FROM battles b LEFT JOIN kingdoms ka ON ka.id = b.attacker_kingdom_id LEFT JOIN kingdoms kd ON kd.id = b.defender_kingdom_id
